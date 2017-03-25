@@ -32,6 +32,8 @@ class Images_Via_Imgix {
 		add_filter( 'wp_get_attachment_url', [ $this, 'replace_image_url' ] );
 		add_filter( 'imgix/add-image-url', [ $this, 'replace_image_url' ] );
 
+		add_filter( 'wp_get_attachment_image_src', [ $this, 'replace_image_size' ] );
+
 		add_filter( 'wp_calculate_image_srcset', [ $this, 'replace_host_in_srcset' ], 10 );
 		add_filter( 'the_content', [ $this, 'replace_images_in_content' ] );
 		add_action( 'wp_head', [ $this, 'prefetch_cdn' ], 1 );
@@ -126,6 +128,27 @@ class Images_Via_Imgix {
 		}
 
 		return $url;
+	}
+
+	/**
+	 * Add image url parameters to use imgix size settings.
+	 *
+	 * @param string $url
+	 *
+	 * @return string
+	 */
+	public function replace_image_size($img) {
+		list( $file_url, $arguments ) = $this->convert_filename_to_size_args( $img[0] );
+		if ( ! empty( $arguments ) ) {
+			$arguments = array_merge( $arguments, $this->get_global_params() );
+			$parsed_url['query'] = empty( $parsed_url['query'] ) ? build_query( $arguments ) : $parsed_url['query'] . '&' . build_query( $arguments );
+
+			$url = $file_url . http_build_url( $parsed_url );
+
+			return array($url, $img[1], $img[2], $img[3]);
+		} else {
+			return $img;
+		}
 	}
 
 	/**
