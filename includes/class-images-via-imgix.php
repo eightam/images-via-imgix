@@ -35,7 +35,7 @@ class Images_Via_Imgix {
 		add_filter( 'wp_get_attachment_image_src', [ $this, 'replace_image_size' ] );
 
 		add_filter( 'wp_calculate_image_srcset', [ $this, 'replace_host_in_srcset' ], 10 );
-		add_filter( 'the_content', [ $this, 'replace_images_in_content' ] );
+		//add_filter( 'the_content', [ $this, 'replace_images_in_content' ] );
 		add_action( 'wp_head', [ $this, 'prefetch_cdn' ], 1 );
 
 		add_action( 'after_setup_theme', [ $this, 'buffer_start_for_retina' ] );
@@ -174,6 +174,7 @@ class Images_Via_Imgix {
 	 * @return string
 	 */
 	public function replace_images_in_content( $content ) {
+
 		if ( ! empty ( $this->options['cdn_link'] ) ) {
 			$content = preg_replace_callback( '/(?<=\shref="|\ssrc="|\shref=\'|\ssrc=\').*(?=\'|")/', function ( $match ) {
 				return esc_url( apply_filters( 'imgix/add-image-url', $match[0] ) );
